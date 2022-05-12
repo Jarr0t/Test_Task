@@ -1,5 +1,7 @@
 window.addEventListener("DOMContentLoaded", function() {
-    let lastSearch;
+    let lastSearch, dataJSON = {currentWeather: {}, weatherFiveDays: {
+        "1": {}, "2": {}, "3": {}, "4": {}, "5": {}
+    }};
     let box = document.querySelector(".box");
 
     box.style.opacity = 1;
@@ -69,6 +71,7 @@ window.addEventListener("DOMContentLoaded", function() {
             } else if (data.city.name) {
                 fiveDays(data);
             }
+            
         }).catch(err => {
             console.log(err);
         })
@@ -89,17 +92,31 @@ window.addEventListener("DOMContentLoaded", function() {
         curSelAll[0].children[2].innerHTML = Math.floor((data.main.temp - 273)) + "℃";
         curSelAll[0].children[3].innerHTML = timeConverter(data.dt);
         curSelAll[0].children[4].innerHTML = windDirection(data.wind.deg) + " " + Math.floor((data.wind.speed) * 10) / 10 + " m/s";
+        
+        dataJSON.currentWeather.nameCity = data.name;
+        dataJSON.currentWeather.weather = data.weather[0].main;
+        dataJSON.currentWeather.temp = Math.floor((data.main.temp - 273)) + "℃";
+        dataJSON.currentWeather.time = timeConverter(data.dt);
+        dataJSON.currentWeather.wind = windDirection(data.wind.deg) + " " + Math.floor((data.wind.speed) * 10) / 10 + " m/s";
+        dataJSON.temp = Date.now().toString();
+        localStorage.setItem(lastSearch, JSON.stringify(dataJSON));
         curWeat.style.opacity = 1;
     }
 
     function fiveDays(data) {
         FiveHeader.innerHTML = `Weather in ${data.city.name} for 5 days`;
         FiveBox.style.opacity = 1;
+        dataJSON.weatherFiveDays.cityName = data.city.name;
         for (let i = 1; i < 6; i++) {
             FiveTime[i - 1].innerHTML = timeConverter(data.list[(i * 8) - 1].dt, 5);
             FiveWeather[i - 1].innerHTML = data.list[(i * 8) - 1].weather[0].main;
             FiveTemp[i - 1].innerHTML = Math.floor((data.list[(i * 8) - 1].main.temp - 273)) + "℃";
+            
+            dataJSON.weatherFiveDays[`${i}`].time = timeConverter(data.list[(i * 8) - 1].dt, 5);
+            dataJSON.weatherFiveDays[`${i}`].weather = data.list[(i * 8) - 1].weather[0].main;
+            dataJSON.weatherFiveDays[`${i}`].temp = Math.floor((data.list[(i * 8) - 1].main.temp - 273)) + "℃";
         }
+        localStorage.setItem(lastSearch, JSON.stringify(dataJSON));
         reolad.style.opacity = 1;
     }
 })
